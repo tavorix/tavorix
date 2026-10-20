@@ -1,0 +1,24 @@
+# Secrets: never commit these
+.env
+.env.*
+*.pem
+*.key
+mnemonic*
+seed*
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/lib/
+contracts/broadcast/
+
+# Node / Python
+node_modules/
+__pycache__/
+.venv/
+*.pyc
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
