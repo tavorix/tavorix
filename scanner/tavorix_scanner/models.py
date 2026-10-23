@@ -16,10 +16,12 @@ class TokenData:
     top_holder_pct: Optional[float] = None   # excluding LP and burn addresses
     top10_pct: Optional[float] = None        # excluding LP and burn addresses
     lp_locked_pct: Optional[float] = None
+    liquidity_usd: Optional[float] = None    # estimated USD value of the main WBNB/USDT pool
     lp_unlock_days: Optional[float] = None
     contract_age_days: Optional[float] = None
     source_verified: Optional[bool] = None
     owner_renounced: Optional[bool] = None
+    owner_is_contract: Optional[bool] = None  # True if owner is a contract (e.g. multisig/timelock)
     is_proxy: Optional[bool] = None
     deployer_scam_links: Optional[int] = None
 
@@ -43,6 +45,17 @@ class Report:
     level: str
     results: List[CheckResult] = field(default_factory=list)
     unknown_checks: int = 0
+    low_confidence: bool = False  # True when most checks had no data
+    control_score: int = 0        # centralization risk (owner/mint/proxy powers), separate from scam score
+    control_level: str = "low"
 
     def explain(self) -> List[str]:
         return [r.reason for r in self.results if r.triggered]
+
+    def explain_scam(self) -> List[str]:
+        from .scoring import CONTROL_NAMES
+        return [r.reason for r in self.results if r.triggered and r.name not in CONTROL_NAMES]
+
+    def explain_control(self) -> List[str]:
+        from .scoring import CONTROL_NAMES
+        return [r.reason for r in self.results if r.triggered and r.name in CONTROL_NAMES]
