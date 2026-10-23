@@ -1,0 +1,2 @@
+token_address,chain,token_name,label,evidence_type,evidence_url_1,evidence_url_2,date_launched,date_incident,notes,verified_by,verified_date
+0x0000000000000000000000000000000000000000,bsc,EXAMPLE,rugpull,post-mortem,https://example.com/report,,2025-01-01,2025-01-10,example row - delete me,your_name,2026-10-20
