@@ -33,6 +33,9 @@ ul{margin:4px 0 0;padding-left:20px;color:var(--tx)}li{margin:3px 0}
 .hint{color:var(--mut);font-size:.85rem;margin:2px 0 0}
 .warn{border-color:var(--mid);color:var(--mid)}
 .err{border-color:var(--bad);color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--ln)}th{color:var(--c1)}
+.st-flagged{color:var(--bad);font-weight:700}.st-clear{color:var(--ok)}.st-no_data{color:var(--mut)}
+.dl{margin-top:16px;background:var(--card);color:var(--tx);border:1px solid var(--ln)}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:6px}
 .facts div{font-size:.85rem;color:var(--mut)}.facts b{display:block;color:var(--tx);font-size:1rem}
 footer{margin-top:28px;color:var(--mut);font-size:.82rem}
@@ -61,7 +64,11 @@ footer{margin-top:28px;color:var(--mut);font-size:.82rem}
 <div class="card"><h2>Centralization score</h2><div><span class="score" id="cs">0</span><span class="badge" id="cl"></span></div>
 <div class="bar"><i id="cb"></i></div><p class="hint">Who can change the rules: owner, minting, blacklist, pause, upgradeable contract. Many legitimate issuer-controlled tokens score high here.</p><ul id="cr"></ul></div>
 </div>
+<div class="card"><h2>Evidence coverage: <span id="cov"></span></h2><div class="bar"><i id="covb" style="color:var(--c1)"></i></div><p class="hint" id="covt"></p></div>
 <div class="card"><h2>Data we could read</h2><div class="facts" id="facts"></div></div>
+<div class="card"><h2>Check matrix</h2><table><thead><tr><th>Check</th><th>Type</th><th>Result</th></tr></thead><tbody id="mx"></tbody></table></div>
+<p class="hint" id="meta"></p>
+<button class="dl" id="dl">Download JSON report</button>
 </div>
 <footer>This is a risk estimate from public data (BNB Chain RPC, DexScreener, GoPlus), not financial advice or a guarantee of safety. It can be wrong or incomplete. Accuracy has not been validated; do not rely on it alone.</footer>
 </main>
@@ -70,7 +77,16 @@ const $=id=>document.getElementById(id);
 const fmt=(v,u)=>v==null?"unknown":(u==="$"?"$"+Math.round(v).toLocaleString():u==="d"?Math.round(v)+" days":v.toFixed(1)+"%");
 function list(ul,items,empty){ul.replaceChildren();(items.length?items:[empty]).forEach(t=>{const li=document.createElement("li");li.textContent=t;ul.appendChild(li)})}
 function gauge(prefix,score,level){const card=$(prefix+"s").closest(".card");card.className="card "+level;$(prefix+"s").textContent=score;const b=$(prefix+"l");b.textContent=level.toUpperCase();b.className="badge "+level;$(prefix+"b").style.width=score+"%"}
-function show(r){
+let last=null;
+const STAT={flagged:"Flagged",clear:"Clear",no_data:"No data"};
+function renderExtra(r){
+$("cov").textContent=r.evidence_coverage_pct+"%";$("covb").style.width=r.evidence_coverage_pct+"%";
+$("covt").textContent=(r.total_checks-r.unknown_checks)+" of "+r.total_checks+" checks had data. Checks with no data are not counted as safe.";
+const mx=$("mx");mx.replaceChildren();
+r.checks.forEach(c=>{const tr=document.createElement("tr");[c.label,c.category==="scam"?"Scam signal":"Control",STAT[c.status]].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;if(i===2)td.className="st-"+c.status;tr.appendChild(td)});mx.appendChild(tr)});
+$("meta").textContent="Network: "+r.meta.network+". Sources that returned data: "+(r.meta.sources_used.join(", ")||"none")+". Generated "+r.meta.generated_at+".";
+last=r}
+function show(r){renderExtra(r);
 gauge("s",r.scam_score,r.scam_level);gauge("c",r.control_score,r.control_level);
 list($("sr"),r.scam_reasons,"No scam signals found in the data we could read.");
 list($("cr"),r.control_reasons,"No control powers found.");
@@ -84,6 +100,7 @@ try{const res=await fetch("/api/scan?address="+encodeURIComponent(a.trim()));con
 if(!res.ok){m.className="card err";m.textContent=j.error||"Something went wrong.";m.hidden=false}else show(j)}
 catch(e){m.className="card err";m.textContent="Could not reach the demo server. Is it still running?";m.hidden=false}
 $("go").disabled=false;$("go").textContent="Scan"}
+$("dl").onclick=()=>{if(!last)return;const b=new Blob([JSON.stringify(last,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="tavorix-report-"+last.address.slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href)};
 $("go").onclick=()=>scan($("addr").value);
 $("addr").addEventListener("keydown",e=>{if(e.key==="Enter")scan($("addr").value)});
 document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("addr").value=b.dataset.a;scan(b.dataset.a)});

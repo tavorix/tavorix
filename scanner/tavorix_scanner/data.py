@@ -95,11 +95,13 @@ def _lp_locked_pct(rpc: RpcClient, pair: str) -> Optional[float]:
     return 100.0 * locked / total
 
 
-def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=None) -> TokenData:
+def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=None, trace=None) -> TokenData:
     code = rpc.get_code(address)
     if not has_code(code):
         raise ValueError("No contract code at this address on this chain.")
     d = TokenData(address=address)
+    if trace is not None:
+        trace.append("BNB Chain RPC")
     d.has_mint = scan_selectors(code, config.SELECTORS["mint"])
     d.has_blacklist = scan_selectors(code, config.SELECTORS["blacklist"])
     d.has_pause = scan_selectors(code, config.SELECTORS["pause"])
@@ -116,6 +118,8 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
         except Exception:
             info = None
         if info:
+            if trace is not None:
+                trace.append("DexScreener")
             d.liquidity_usd = info["liquidity_usd"]
             if info["age_days"] is not None:
                 d.contract_age_days = info["age_days"]  # proxy: age of the oldest trading pool
@@ -125,6 +129,8 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
         except Exception:
             info = None
         if info:
+            if trace is not None:
+                trace.append("GoPlus")
             for key, value in goplus_mod.to_features(info).items():
                 setattr(d, key, value)
     return d

@@ -51,6 +51,12 @@ class DataTests(unittest.TestCase):
         self.assertAlmostEqual(d.liquidity_usd, 12000.0); self.assertFalse(d.owner_is_contract)
         self.assertIsNone(d.honeypot_sell_failed)  # not determinable via plain RPC
 
+    def test_trace_records_sources(self):
+        t = fake_transport("0x6080", "0x" + "00" * 20, PAIR, 1000, 0)
+        trace = []
+        fetch_token_data(TOKEN, RpcClient("http://x", transport=t), trace=trace)
+        self.assertEqual(trace, ["BNB Chain RPC"])
+
     def test_wallet_owner_detected(self):
         wallet = "0x" + "33" * 20
         t = fake_transport("0x6080", wallet, PAIR, 1000, 0, owner_code="0x")

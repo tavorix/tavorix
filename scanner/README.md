@@ -57,3 +57,8 @@ An old, deeply traded scam (SQUID V1) scored low on scam risk when only on-chain
     python demo/server.py
 Open http://127.0.0.1:8000 in your browser, paste a BNB Chain token address, and press Scan.
 The server only listens on your own computer. Optional: set `TAVORIX_RPC` to your own RPC URL (keep it private).
+
+## Report details (demo)
+The demo JSON report now includes: `evidence_coverage_pct` (share of checks that had data), a `checks` matrix
+(flagged / clear / no_data per check), `meta` (network, sources that returned data, UTC timestamp), and a
+"Download JSON report" button on the page. Checks with no data are never counted as safe.

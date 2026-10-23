@@ -37,11 +37,15 @@ class DemoTests(unittest.TestCase):
         self.assertEqual(self.get("/nope")[0], 404)
 
     def test_report_json_shape(self):
-        d = TokenData("0x" + "11" * 20, honeypot_sell_failed=True, has_mint=True, liquidity_usd=1000.0)
+        d = TokenData("0x" + "11" * 20, honeypot_sell_failed=True, has_mint=True, has_blacklist=False, liquidity_usd=1000.0)
         j = server.report_to_json(score_token(d), d)
         self.assertGreaterEqual(j["scam_score"], 60); self.assertEqual(j["scam_level"], "high")
         self.assertEqual(j["facts"]["liquidity_usd"], 1000.0)
         self.assertEqual(len(j["control_reasons"]), 1)
+        self.assertEqual(len(j["checks"]), 17)
+        self.assertEqual({c["status"] for c in j["checks"]}, {"flagged", "clear", "no_data"})
+        self.assertEqual(j["evidence_coverage_pct"], round(100 * (17 - j["unknown_checks"]) / 17))
+        self.assertIn("generated_at", j["meta"]); self.assertEqual(j["meta"]["sources_used"], [])
         json.dumps(j)  # must be serializable
 
     def test_server_error_is_generic(self):

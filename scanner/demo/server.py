@@ -11,12 +11,14 @@ import os
 import re
 import sys
 import time
+import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from tavorix_scanner import dexscreener, goplus, score_token  # noqa: E402
+from tavorix_scanner.scoring import check_matrix, coverage_pct  # noqa: E402
 from tavorix_scanner.data import fetch_token_data  # noqa: E402
 from tavorix_scanner.rpc import RpcClient  # noqa: E402
 
@@ -26,8 +28,14 @@ CACHE_SECONDS = 60
 _cache = {}
 
 
-def report_to_json(report, data) -> dict:
+def report_to_json(report, data, sources=None) -> dict:
     return {
+        "meta": {
+            "network": "BNB Smart Chain (chain id 56)", "sources_used": sources or [],
+            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+            "tool": "Tavorix Token Check demo (unvalidated estimates)",
+        },
+        "evidence_coverage_pct": coverage_pct(report), "checks": check_matrix(report),
         "address": report.address,
         "scam_score": report.score, "scam_level": report.level,
         "control_score": report.control_score, "control_level": report.control_level,
@@ -47,9 +55,10 @@ def scan(address: str) -> dict:
     hit = _cache.get(key)
     if hit and time.time() - hit[0] < CACHE_SECONDS:
         return hit[1]
-    data = fetch_token_data(address, RpcClient(RPC_URL),
-                            dex_fetch=dexscreener.fetch_pairs, goplus_fetch=goplus.fetch)
-    result = report_to_json(score_token(data), data)
+    trace = []
+    data = fetch_token_data(address, RpcClient(RPC_URL), dex_fetch=dexscreener.fetch_pairs,
+                            goplus_fetch=goplus.fetch, trace=trace)
+    result = report_to_json(score_token(data), data, trace)
     _cache[key] = (time.time(), result)
     return result
 
