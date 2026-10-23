@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tavorix Token Check (demo)</title>
+<style>
+:root{--bg:#050817;--tx:#e8ecff;--mut:#9aa3d6;--card:rgba(255,255,255,.05);--ln:rgba(120,140,255,.3);--c1:#5ef2ff;--c2:#ff5fd2;--c3:#8b6cff;--ok:#5dffb0;--mid:#ffd36b;--bad:#ff6b8b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,Segoe UI,sans-serif;min-height:100vh;
+background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:52px 52px}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(94,242,255,.2),transparent 60%),linear-gradient(180deg,transparent 40%,var(--bg));pointer-events:none}
+main{position:relative;max-width:860px;margin:0 auto;padding:40px 20px 70px}
+h1{font-size:clamp(2rem,6vw,3rem);margin:0 0 6px;letter-spacing:-.02em}
+.holo{background:linear-gradient(110deg,var(--c1),var(--c3),var(--c2),var(--c1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:s 8s linear infinite}
+@keyframes s{to{background-position:300% 0}}
+.sub{color:var(--mut);margin:0 0 24px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input{flex:1 1 320px;padding:14px 16px;border-radius:12px;border:1px solid var(--ln);background:var(--card);color:var(--tx);font:inherit}
+button{padding:14px 22px;border-radius:12px;border:0;font:600 1rem system-ui;color:#050817;cursor:pointer;background:linear-gradient(110deg,var(--c1),var(--c3))}
+button:disabled{opacity:.5;cursor:wait}
+.ex{margin:12px 0 0;color:var(--mut);font-size:.9rem}
+.ex button{padding:4px 12px;margin:3px 4px 0 0;font-size:.85rem;background:var(--card);color:var(--tx);border:1px solid var(--ln)}
+.card{border:1px solid var(--ln);background:var(--card);border-radius:16px;padding:18px;margin-top:16px;backdrop-filter:blur(8px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.score{font-size:3rem;font-weight:800;line-height:1}
+.badge{display:inline-block;padding:2px 12px;border-radius:999px;font-size:.8rem;font-weight:700;border:1px solid currentColor;margin-left:8px;vertical-align:middle}
+.low{color:var(--ok)}.medium{color:var(--mid)}.high{color:var(--bad)}
+.bar{height:8px;border-radius:4px;background:rgba(255,255,255,.08);margin:12px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:currentColor;box-shadow:0 0 12px currentColor}
+h2{font-size:1rem;margin:0 0 4px}h3{font-size:.9rem;margin:14px 0 4px;color:var(--mut)}
+ul{margin:4px 0 0;padding-left:20px;color:var(--tx)}li{margin:3px 0}
+.hint{color:var(--mut);font-size:.85rem;margin:2px 0 0}
+.warn{border-color:var(--mid);color:var(--mid)}
+.err{border-color:var(--bad);color:var(--bad)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:6px}
+.facts div{font-size:.85rem;color:var(--mut)}.facts b{display:block;color:var(--tx);font-size:1rem}
+footer{margin-top:28px;color:var(--mut);font-size:.82rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1><span class="holo">Tavorix</span> Token Check</h1>
+<p class="sub">Demo for BNB Chain tokens: a plain-language risk estimate before you trade. Early-stage, not validated.</p>
+<div class="row">
+<input id="addr" placeholder="Paste a BNB Chain token address (0x...)" autocomplete="off" spellcheck="false">
+<button id="go">Scan</button>
+</div>
+<p class="ex">Try:
+<button data-a="0x1Ba42e5193dfA8B03D15dd1B86a3113bbBEF8Eeb">ZEC (Binance-Peg)</button>
+<button data-a="0x47474747477b199288bF72a1D702f7Fe0Fb1DEeA">WLFI</button>
+<button data-a="0x608593d17A2decBbc4399e4185bE4922F97eD32E">USDY</button>
+<button data-a="0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c">WBNB</button></p>
+<div id="msg" class="card" hidden></div>
+<div id="out" hidden>
+<div id="conf" class="card warn" hidden></div>
+<div class="grid">
+<div class="card"><h2>Scam-risk score</h2><div><span class="score" id="ss">0</span><span class="badge" id="sl"></span></div>
+<div class="bar"><i id="sb"></i></div><p class="hint">Signals linked to scams: honeypots, taxes, thin or unlocked liquidity, concentrated holders.</p><ul id="sr"></ul></div>
+<div class="card"><h2>Centralization score</h2><div><span class="score" id="cs">0</span><span class="badge" id="cl"></span></div>
+<div class="bar"><i id="cb"></i></div><p class="hint">Who can change the rules: owner, minting, blacklist, pause, upgradeable contract. Many legitimate issuer-controlled tokens score high here.</p><ul id="cr"></ul></div>
+</div>
+<div class="card"><h2>Data we could read</h2><div class="facts" id="facts"></div></div>
+</div>
+<footer>This is a risk estimate from public data (BNB Chain RPC, DexScreener, GoPlus), not financial advice or a guarantee of safety. It can be wrong or incomplete. Accuracy has not been validated; do not rely on it alone.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=(v,u)=>v==null?"unknown":(u==="$"?"$"+Math.round(v).toLocaleString():u==="d"?Math.round(v)+" days":v.toFixed(1)+"%");
+function list(ul,items,empty){ul.replaceChildren();(items.length?items:[empty]).forEach(t=>{const li=document.createElement("li");li.textContent=t;ul.appendChild(li)})}
+function gauge(prefix,score,level){const card=$(prefix+"s").closest(".card");card.className="card "+level;$(prefix+"s").textContent=score;const b=$(prefix+"l");b.textContent=level.toUpperCase();b.className="badge "+level;$(prefix+"b").style.width=score+"%"}
+function show(r){
+gauge("s",r.scam_score,r.scam_level);gauge("c",r.control_score,r.control_level);
+list($("sr"),r.scam_reasons,"No scam signals found in the data we could read.");
+list($("cr"),r.control_reasons,"No control powers found.");
+const c=$("conf");c.hidden=!r.low_confidence;c.textContent=r.low_confidence?"Low confidence: "+r.unknown_checks+" of "+r.total_checks+" checks had no data, so these scores may understate the risk. Do not read them as safe.":"";
+const f=r.facts,items=[["Liquidity",fmt(f.liquidity_usd,"$")],["Trading age",fmt(f.trading_age_days,"d")],["Top holder",fmt(f.top_holder_pct)],["Buy tax",fmt(f.buy_tax_pct)],["Sell tax",fmt(f.sell_tax_pct)],["LP locked",fmt(f.lp_locked_pct)]];
+$("facts").replaceChildren();items.forEach(([k,v])=>{const d=document.createElement("div");d.textContent=k;const b=document.createElement("b");b.textContent=v;d.appendChild(b);$("facts").appendChild(d)});
+$("out").hidden=false}
+async function scan(a){
+const m=$("msg");m.hidden=true;$("out").hidden=true;$("go").disabled=true;$("go").textContent="Scanning...";
+try{const res=await fetch("/api/scan?address="+encodeURIComponent(a.trim()));const j=await res.json();
+if(!res.ok){m.className="card err";m.textContent=j.error||"Something went wrong.";m.hidden=false}else show(j)}
+catch(e){m.className="card err";m.textContent="Could not reach the demo server. Is it still running?";m.hidden=false}
+$("go").disabled=false;$("go").textContent="Scan"}
+$("go").onclick=()=>scan($("addr").value);
+$("addr").addEventListener("keydown",e=>{if(e.key==="Enter")scan($("addr").value)});
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{$("addr").value=b.dataset.a;scan(b.dataset.a)});
+</script>
+</body>
+</html>
