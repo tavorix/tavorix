@@ -12,7 +12,7 @@ from tavorix_scanner.models import FEATURE_NAMES
 
 SCAM_LABELS = {"rugpull", "honeypot", "scam_other"}
 BOOL_FIELDS = {"has_mint", "has_blacklist", "has_pause", "tax_mutable", "honeypot_sell_failed",
-               "source_verified", "owner_renounced", "is_proxy"}
+               "source_verified", "owner_renounced", "owner_is_contract", "is_proxy"}
 INT_FIELDS = {"deployer_scam_links"}
 
 
@@ -56,6 +56,7 @@ def main(argv: Optional[list] = None) -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("csv_path")
     ap.add_argument("--threshold", type=int, default=40)
+    ap.add_argument("--details", action="store_true", help="show score and triggered checks per token")
     args = ap.parse_args(argv)
     with open(args.csv_path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
@@ -63,6 +64,15 @@ def main(argv: Optional[list] = None) -> None:
     print(f"threshold={args.threshold} n={len(rows)}")
     for k, v in m.items():
         print(f"{k}: {v:.3f}" if isinstance(v, float) else f"{k}: {v}")
+    if args.details:
+        print()
+        for row in rows:
+            rep = score_token(row_to_token(row))
+            hit = ", ".join(r.name for r in rep.results if r.triggered) or "none"
+            flag = "FLAGGED" if rep.score >= args.threshold else "ok"
+            print(f"{row['label']:<10} {row['address'][:10]}..{row['address'][-4:]} "
+                  f"scam={rep.score:<3} control={rep.control_score:<3} {flag:<8} "
+                  f"unknown={rep.unknown_checks}/{len(rep.results)} triggered: {hit}")
 
 
 if __name__ == "__main__":

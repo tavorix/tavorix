@@ -9,6 +9,9 @@ TOP10_PCT = 70.0
 LP_LOCKED_MIN_PCT = 50.0
 LP_UNLOCK_SOON_DAYS = 30.0
 NEW_CONTRACT_DAYS = 7.0
+LOW_LIQUIDITY_USD = 5000.0
+ESTABLISHED_AGE_DAYS = 180.0
+ESTABLISHED_LIQUIDITY_USD = 100_000.0
 
 
 def _unknown(name: str, weight: int) -> CheckResult:
@@ -72,10 +75,17 @@ def top10(d: TokenData) -> CheckResult:
                        f"The top 10 wallets hold {d.top10_pct:.1f}% of supply.")
 
 
+def is_established(d: TokenData) -> bool:
+    """Heuristic (to be validated on labeled data): old AND deep liquidity makes a rugpull less likely."""
+    return (d.contract_age_days is not None and d.liquidity_usd is not None
+            and d.contract_age_days >= ESTABLISHED_AGE_DAYS and d.liquidity_usd >= ESTABLISHED_LIQUIDITY_USD)
+
+
 def lp_unlocked(d: TokenData) -> CheckResult:
     if d.lp_locked_pct is None:
         return _unknown("lp_not_locked", 25)
-    return CheckResult("lp_not_locked", d.lp_locked_pct < LP_LOCKED_MIN_PCT, 25,
+    weight = 5 if is_established(d) else 25
+    return CheckResult("lp_not_locked", d.lp_locked_pct < LP_LOCKED_MIN_PCT, weight,
                        f"Only {d.lp_locked_pct:.0f}% of liquidity is locked, so it could be withdrawn.")
 
 
@@ -90,7 +100,7 @@ def new_contract(d: TokenData) -> CheckResult:
     if d.contract_age_days is None:
         return _unknown("new_contract", 10)
     return CheckResult("new_contract", d.contract_age_days < NEW_CONTRACT_DAYS, 10,
-                       f"The contract is only {d.contract_age_days:.0f} days old.")
+                       f"The token has only been trading for {d.contract_age_days:.0f} days.")
 
 
 def unverified_source(d: TokenData) -> CheckResult:
@@ -121,8 +131,22 @@ def deployer_history(d: TokenData) -> CheckResult:
                        f"The deployer is linked to {d.deployer_scam_links} earlier flagged token(s).")
 
 
+def owner_is_wallet(d: TokenData) -> CheckResult:
+    if d.owner_renounced is None or d.owner_is_contract is None:
+        return _unknown("owner_is_wallet", 15)
+    return CheckResult("owner_is_wallet", (not d.owner_renounced) and (not d.owner_is_contract), 15,
+                       "The owner is a single wallet, so one person controls the contract.")
+
+
+def low_liquidity(d: TokenData) -> CheckResult:
+    if d.liquidity_usd is None:
+        return _unknown("low_liquidity", 20)
+    return CheckResult("low_liquidity", d.liquidity_usd < LOW_LIQUIDITY_USD, 20,
+                       f"Only about ${d.liquidity_usd:,.0f} of liquidity in the main pool, so the price is easy to move.")
+
+
 ALL_CHECKS: List[Callable[[TokenData], CheckResult]] = [
     honeypot, hidden_mint, blacklist, pause, high_tax, mutable_tax, top_holder, top10,
     lp_unlocked, lp_unlock_soon, new_contract, unverified_source, owner_active,
-    upgradeable, deployer_history,
+    upgradeable, deployer_history, owner_is_wallet, low_liquidity,
 ]

@@ -9,7 +9,7 @@ class ScoringTests(unittest.TestCase):
         d = TokenData("0xA", has_mint=False, has_blacklist=False, has_pause=False, buy_tax_pct=0, sell_tax_pct=0,
                       tax_mutable=False, honeypot_sell_failed=False, top_holder_pct=5, top10_pct=30,
                       lp_locked_pct=100, lp_unlock_days=400, contract_age_days=300, source_verified=True,
-                      owner_renounced=True, is_proxy=False, deployer_scam_links=0)
+                      owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0)
         r = score_token(d)
         self.assertEqual(r.score, 0); self.assertEqual(r.level, "low"); self.assertEqual(r.unknown_checks, 0)
 
@@ -19,16 +19,40 @@ class ScoringTests(unittest.TestCase):
 
     def test_unknown_data_does_not_trigger(self):
         r = score_token(TokenData("0xC"))
-        self.assertEqual(r.score, 0); self.assertEqual(r.unknown_checks, 15)
+        self.assertEqual(r.score, 0); self.assertEqual(r.unknown_checks, 17)
+
+    def test_low_confidence_flag(self):
+        self.assertTrue(score_token(TokenData("0xF")).low_confidence)
+        full = TokenData("0xG", has_mint=False, has_blacklist=False, has_pause=False, buy_tax_pct=0, sell_tax_pct=0,
+                         tax_mutable=False, honeypot_sell_failed=False, top_holder_pct=5, top10_pct=30,
+                         lp_locked_pct=100, lp_unlock_days=400, contract_age_days=300, source_verified=True,
+                         owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0)
+        self.assertFalse(score_token(full).low_confidence)
 
     def test_score_capped_at_100(self):
         d = TokenData("0xD", honeypot_sell_failed=True, has_mint=True, has_blacklist=True, deployer_scam_links=3,
                       lp_locked_pct=0, source_verified=False, is_proxy=True)
         self.assertEqual(score_token(d).score, 100)
 
+    def test_control_and_scam_are_separate(self):
+        r = score_token(TokenData("0xH", owner_renounced=False, owner_is_contract=False, liquidity_usd=2000.0,
+                                  has_mint=True))
+        names = [x.name for x in r.results if x.triggered]
+        self.assertIn("owner_is_wallet", names); self.assertIn("low_liquidity", names)
+        self.assertEqual(r.score, 20)            # scam: low liquidity only
+        self.assertEqual(r.control_score, 25 + 15 + 5)  # mint + wallet owner + owner not renounced
+        self.assertEqual(r.level, "low"); self.assertEqual(r.control_level, "high")
+
+    def test_established_token_downweights_unlocked_lp(self):
+        young = score_token(TokenData("0xI", lp_locked_pct=0, contract_age_days=3, liquidity_usd=500000))
+        old = score_token(TokenData("0xJ", lp_locked_pct=0, contract_age_days=400, liquidity_usd=500000))
+        self.assertEqual(young.score, 25 + 10)  # unlocked LP + new token
+        self.assertEqual(old.score, 5)
+
     def test_explanations_present(self):
         r = score_token(TokenData("0xE", has_mint=True))
         self.assertEqual(len(r.explain()), 1)
+        self.assertEqual(len(r.explain_control()), 1); self.assertEqual(len(r.explain_scam()), 0)
 
 
 class EvalTests(unittest.TestCase):
