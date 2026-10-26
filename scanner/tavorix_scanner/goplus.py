@@ -85,3 +85,8 @@ def to_features(info: dict) -> dict:
                 locked += p
         out["lp_locked_pct"] = min(100.0, locked)
     return out
+
+
+def in_dex(info: Optional[dict]) -> Optional[bool]:
+    """True/False if GoPlus says the token trades on a DEX, None if it does not say."""
+    return _flag((info or {}).get("is_in_dex"))

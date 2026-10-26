@@ -25,6 +25,14 @@ def honeypot(d: TokenData) -> CheckResult:
                        "Selling this token failed or lost most value in simulation (possible honeypot).")
 
 
+def impersonation(d: TokenData) -> CheckResult:
+    if d.impersonates_known_token is None:
+        return _unknown("impersonation", 50)
+    who = d.impersonated_symbol or "a well-known token"
+    return CheckResult("impersonation", d.impersonates_known_token, 50,
+                       f"This token uses the name or symbol of {who} but is not the official contract.")
+
+
 def hidden_mint(d: TokenData) -> CheckResult:
     if d.has_mint is None:
         return _unknown("mint_function", 25)
@@ -146,7 +154,7 @@ def low_liquidity(d: TokenData) -> CheckResult:
 
 
 ALL_CHECKS: List[Callable[[TokenData], CheckResult]] = [
-    honeypot, hidden_mint, blacklist, pause, high_tax, mutable_tax, top_holder, top10,
+    honeypot, impersonation, hidden_mint, blacklist, pause, high_tax, mutable_tax, top_holder, top10,
     lp_unlocked, lp_unlock_soon, new_contract, unverified_source, owner_active,
     upgradeable, deployer_history, owner_is_wallet, low_liquidity,
 ]

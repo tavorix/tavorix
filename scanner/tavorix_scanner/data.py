@@ -10,7 +10,9 @@ fork simulation, and are the next steps.
 from typing import Optional
 from . import config
 from .models import TokenData
-from .rpc import RpcClient, pad_address, decode_address, decode_uint
+from .rpc import RpcClient, pad_address, decode_address, decode_uint, decode_string
+from .checks import TAX_HIGH_PCT
+from .impersonation import find_impersonation
 from .dexscreener import summarize
 from . import goplus as goplus_mod
 
@@ -95,6 +97,21 @@ def _lp_locked_pct(rpc: RpcClient, pair: str) -> Optional[float]:
     return 100.0 * locked / total
 
 
+def _guard_simulation(d: TokenData, goplus_info: dict) -> None:
+    """Honeypot and tax results come from a trade simulation. If no tradable pool exists, nothing was
+    really simulated, so a 'clear' result is not evidence. Report it as unknown (never as safe)."""
+    flag = goplus_mod.in_dex(goplus_info)
+    tradable = flag if flag is not None else (d.liquidity_usd is not None and d.liquidity_usd > 0)
+    if tradable:
+        return
+    if d.honeypot_sell_failed is False:
+        d.honeypot_sell_failed = None
+    for name in ("buy_tax_pct", "sell_tax_pct"):
+        value = getattr(d, name)
+        if value is not None and value <= TAX_HIGH_PCT:
+            setattr(d, name, None)
+
+
 def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=None, trace=None) -> TokenData:
     code = rpc.get_code(address)
     if not has_code(code):
@@ -102,6 +119,9 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
     d = TokenData(address=address)
     if trace is not None:
         trace.append("BNB Chain RPC")
+    symbol = decode_string(rpc.eth_call(address, "0x95d89b41"))  # symbol()
+    name = decode_string(rpc.eth_call(address, "0x06fdde03"))    # name()
+    d.impersonates_known_token, d.impersonated_symbol = find_impersonation(symbol, name, address)
     d.has_mint = scan_selectors(code, config.SELECTORS["mint"])
     d.has_blacklist = scan_selectors(code, config.SELECTORS["blacklist"])
     d.has_pause = scan_selectors(code, config.SELECTORS["pause"])
@@ -133,4 +153,8 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
                 trace.append("GoPlus")
             for key, value in goplus_mod.to_features(info).items():
                 setattr(d, key, value)
+            _guard_simulation(d, info)
+            if d.impersonates_known_token is None:  # fall back to GoPlus name/symbol if the RPC gave none
+                d.impersonates_known_token, d.impersonated_symbol = find_impersonation(
+                    info.get("token_symbol"), info.get("token_name"), address)
     return d

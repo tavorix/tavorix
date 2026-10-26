@@ -1,17 +1,15 @@
-# Risk Scanner (planned)
+# Tavorix scanner
 
-Input: BNB Smart Chain token address. Output: risk score (0-100) with explanations.
+Input: BNB Smart Chain token address. Output: two risk estimates (scam risk and centralization), the reasons, evidence coverage, and a per-check matrix. See `CHECKS.md` for the full list of checks and their data sources.
 
-v1 checks (rule-based): hidden mint, blacklist/pause functions, buy/sell tax, honeypot simulation, holder concentration, LP lock status, contract age, deployer history.
-
-Success criteria: publish precision/recall on a labeled dataset of historical rugpulls and healthy tokens before any public launch.
+Status: early, rule-based, **not validated**. A public accuracy report is a planned milestone and will include failures.
 
 ## Run the tests (no network needed)
     python3 -m unittest discover -s tests -v
 
 ## Measure accuracy
 1. Fill `dataset_template.csv` (labels + evidence), following `LABELING.md`.
-2. Implement `tavorix_scanner/data.py` to collect each token's facts, and save them as a CSV like `features_template.csv`.
+2. Collect each token's facts with `collect.py` (see "Build the accuracy test" below) into a CSV like `features_template.csv`.
 3. Split rows 70/30 (train/test). Tune weights and threshold on train only.
 4. `python3 evaluate.py test_features.csv --threshold 40` and publish precision, recall and false-positive rate.
 
@@ -23,7 +21,7 @@ Weights in `checks.py` are initial guesses, not validated. Scores are risk estim
 Notes:
 - BscScan's own API was folded into Etherscan API V2 (use chainid=56). Check the current plan/pricing before relying on it.
 - `data.py` currently fills: mint/blacklist/pause/proxy hints (bytecode selector scan), owner renounced and owner type, LP locked %, estimated USD liquidity (biggest WBNB or USDT PancakeSwap v2 pool).
-  Still unknown (None): honeypot simulation, taxes, holder concentration, contract age, source verification, deployer history.
+  Optional sources (DexScreener, GoPlus) fill most other checks when reachable; anything still missing stays unknown (None) and is never counted as safe.
   Liquidity and LP lock only look at the token/WBNB PancakeSwap v2 pool (tokens paired with USDT or traded on v3 show unknown).
 - Selector and address constants in `config.py` must be verified before use. Bytecode scanning gives hints, not proof.
 
@@ -62,3 +60,6 @@ The server only listens on your own computer. Optional: set `TAVORIX_RPC` to you
 The demo JSON report now includes: `evidence_coverage_pct` (share of checks that had data), a `checks` matrix
 (flagged / clear / no_data per check), `meta` (network, sources that returned data, UTC timestamp), and a
 "Download JSON report" button on the page. Checks with no data are never counted as safe.
+
+## Dataset status
+`my_dataset.csv` holds only rows that meet `LABELING.md` (two evidence sources). Rows still waiting for a second source are in `dataset_pending.csv` and are not used for accuracy numbers. The dataset is small and a public accuracy report is still a planned milestone.

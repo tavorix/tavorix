@@ -7,6 +7,11 @@ DEAD_ADDRESSES = {
     "0x0000000000000000000000000000000000000000",
     "0x000000000000000000000000000000000000dead",
 }
+# Famous tokens that scammers copy. Use ONLY official BSC addresses you verified on BscScan, then add more here.
+KNOWN_TOKENS = {
+    "USDT": {"address": USDT, "names": ["Tether USD", "Tether"]},
+    "WBNB": {"address": WBNB, "names": ["Wrapped BNB"]},
+}
 # Add addresses of LP locker contracts you trust (verify each one yourself).
 LP_LOCKER_ADDRESSES: set = set()
 
