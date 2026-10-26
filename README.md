@@ -1,26 +1,28 @@
 # Tavorix
 
-AI protection layer for on-chain traders on BNB Smart Chain: token risk scoring, MEV-aware execution, and plain-language risk explanations. Non-custodial by design.
+Open-source project building a plain-language token risk check for BNB Chain: two separate scores (scam risk and centralization risk), each with its reasons shown.
 
-> **Status: early concept / pre-MVP.** No product is live. Smart contracts are unaudited drafts. Nothing here is investment, legal, or tax advice, and no token sale is open.
+> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. Smart contract drafts are unaudited and not deployed. Nothing here is investment, legal, or tax advice. No token sale is open, and none is part of Tavorix's funding request.
+
+Founder: dadangseti
+
+Demo video: https://www.youtube.com/watch?v=whrqD_Ba2i8
 
 ## Repository layout
 
 | Path | Purpose |
 |---|---|
-| `contracts/` | Draft Solidity contracts (token, vesting vault, presale vault), Foundry project |
-| `scanner/` | Risk Scanner v1 (planned): rule-based token checks, then ML |
-| `docs/` | Whitepaper, architecture notes, dataset methodology |
+| `contracts/` | Unaudited draft contracts for a token concept. Not deployed, not part of the funding request |
+| `scanner/` | Risk Scanner: rule-based checks (18 checks, two scores, JSON report) with 39 automated tests using BNB Chain RPC, DexScreener and GoPlus data |
+| `docs/` | Architecture notes and dataset methodology |
 
-## Roadmap (summary)
+## Roadmap (proposed, depends on funding and team capacity)
 
-1. Foundation: team, legal structure, data pipeline
-2. MVP: Risk Scanner and private testnet
-3. Strategic round and independent security audit
-4. Public beta with published accuracy metrics
-5. Token launch (only where legally permitted)
-6. Copilot, multi-chain, B2B risk API
-7. Guarded agents, verifiable AI, progressive decentralization
+1. **Weeks 1 to 6:** Public hosted demo, documentation, first 50 verified dataset entries.
+2. **Weeks 7 to 12:** about 150 verified entries, richer holder and age data, first public accuracy report including failures.
+3. **Weeks 13 to 20:** simulation-based honeypot detection, an open API, and a pilot with traders.
+
+Anything beyond this (ML models, other chains, a token) comes only after validation, independent audits and legal review.
 
 ## Contact
 
