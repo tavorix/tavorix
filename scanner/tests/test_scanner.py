@@ -9,7 +9,7 @@ class ScoringTests(unittest.TestCase):
         d = TokenData("0xA", has_mint=False, has_blacklist=False, has_pause=False, buy_tax_pct=0, sell_tax_pct=0,
                       tax_mutable=False, honeypot_sell_failed=False, top_holder_pct=5, top10_pct=30,
                       lp_locked_pct=100, lp_unlock_days=400, contract_age_days=300, source_verified=True,
-                      owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0)
+                      owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0, impersonates_known_token=False)
         r = score_token(d)
         self.assertEqual(r.score, 0); self.assertEqual(r.level, "low"); self.assertEqual(r.unknown_checks, 0)
 
@@ -19,14 +19,14 @@ class ScoringTests(unittest.TestCase):
 
     def test_unknown_data_does_not_trigger(self):
         r = score_token(TokenData("0xC"))
-        self.assertEqual(r.score, 0); self.assertEqual(r.unknown_checks, 17)
+        self.assertEqual(r.score, 0); self.assertEqual(r.unknown_checks, 18)
 
     def test_low_confidence_flag(self):
         self.assertTrue(score_token(TokenData("0xF")).low_confidence)
         full = TokenData("0xG", has_mint=False, has_blacklist=False, has_pause=False, buy_tax_pct=0, sell_tax_pct=0,
                          tax_mutable=False, honeypot_sell_failed=False, top_holder_pct=5, top10_pct=30,
                          lp_locked_pct=100, lp_unlock_days=400, contract_age_days=300, source_verified=True,
-                         owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0)
+                         owner_renounced=True, owner_is_contract=False, liquidity_usd=500000, is_proxy=False, deployer_scam_links=0, impersonates_known_token=False)
         self.assertFalse(score_token(full).low_confidence)
 
     def test_score_capped_at_100(self):

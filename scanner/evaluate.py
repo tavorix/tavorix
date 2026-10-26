@@ -12,7 +12,7 @@ from tavorix_scanner.models import FEATURE_NAMES
 
 SCAM_LABELS = {"rugpull", "honeypot", "scam_other"}
 BOOL_FIELDS = {"has_mint", "has_blacklist", "has_pause", "tax_mutable", "honeypot_sell_failed",
-               "source_verified", "owner_renounced", "owner_is_contract", "is_proxy"}
+               "source_verified", "owner_renounced", "owner_is_contract", "is_proxy", "impersonates_known_token"}
 INT_FIELDS = {"deployer_scam_links"}
 
 

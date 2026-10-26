@@ -1,0 +1,6 @@
+token_address,chain,token_name,label,evidence_type,evidence_url_1,evidence_url_2,date_launched,date_incident,notes,verified_by,verified_date
+0x54261774905f3e6E9718f2ABb10ed6555cae308a,bsc,ANY Bitcoin (anyBTC),uncertain,explorer,https://bscscan.com/address/0x54261774905f3e6E9718f2ABb10ed6555cae308a,,about 2020,,"Creator ""Anyswap: Deployer 3"" (bridge token). Check status of the bridge before labeling; excluded from accuracy tests until resolved",,2026-10-22
+0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c,bsc,WBNB (wrapped BNB),healthy,,,,,,TRIAL ROW - wrapped native token (atypical),,
+0x1Ba42e5193dfA8B03D15dd1B86a3113bbBEF8Eeb,bsc,Zcash: ZEC Token (Binance-Peg),healthy,explorer,https://bscscan.com/address/0x1Ba42e5193dfA8B03D15dd1B86a3113bbBEF8Eeb,,about 2020,,"Creator ""Binance: Deployer 2""; 444k+ transactions; centralized peg issuance (owner + mint by design)",,2026-10-22
+0x608593d17A2decBbc4399e4185bE4922F97eD32E,bsc,,healthy,,,,,,TRIAL ROW - not verified yet,,
+0x47474747477b199288bF72a1D702f7Fe0Fb1DEeA,bsc,World Liberty Financial (WLFI),healthy,explorer,https://bscscan.com/address/0x47474747477b199288bF72a1D702f7Fe0Fb1DEeA,,about 2025,,Upgradeable proxy; 189k+ transactions; creator is World Liberty Financial; centralization risk but widely traded,,2026-10-22

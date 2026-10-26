@@ -61,3 +61,24 @@ def decode_uint(word: Optional[str]) -> Optional[int]:
     if not word or word == "0x":
         return None
     return int(word, 16)
+
+
+def decode_string(word: Optional[str]) -> Optional[str]:
+    """Decode an ABI-encoded string, or the bytes32 form used by some old tokens. None if unreadable."""
+    if not word or word == "0x":
+        return None
+    try:
+        raw = bytes.fromhex(word[2:] if word.startswith("0x") else word)
+        if len(raw) == 32:
+            text = raw.rstrip(b"\x00").decode("utf-8", "ignore")
+        elif len(raw) >= 64:
+            offset = int.from_bytes(raw[0:32], "big")
+            length = int.from_bytes(raw[offset:offset + 32], "big")
+            if length > 1000:
+                return None
+            text = raw[offset + 32:offset + 32 + length].decode("utf-8", "ignore")
+        else:
+            return None
+    except (ValueError, OverflowError):
+        return None
+    return text.strip("\x00 \t\n") or None

@@ -15,7 +15,7 @@ CHECK_LABELS = {
     "new_contract": "Recently launched", "unverified_source": "Source code not verified",
     "owner_not_renounced": "Owner not renounced", "upgradeable_proxy": "Upgradeable contract",
     "deployer_history": "Deployer linked to scams", "owner_is_wallet": "Owner is a single wallet",
-    "low_liquidity": "Thin liquidity",
+    "low_liquidity": "Thin liquidity", "impersonation": "Impersonates a known token",
 }
 
 LOW_MAX = 29

@@ -24,9 +24,11 @@ class TokenData:
     owner_is_contract: Optional[bool] = None  # True if owner is a contract (e.g. multisig/timelock)
     is_proxy: Optional[bool] = None
     deployer_scam_links: Optional[int] = None
+    impersonates_known_token: Optional[bool] = None  # same name/symbol as a famous token, but not its official contract
+    impersonated_symbol: Optional[str] = None         # which token is copied (for the explanation only)
 
 
-FEATURE_NAMES = [f.name for f in fields(TokenData) if f.name != "address"]
+FEATURE_NAMES = [f.name for f in fields(TokenData) if f.name not in ("address", "impersonated_symbol")]
 
 
 @dataclass
