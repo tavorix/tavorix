@@ -4,7 +4,7 @@ Open-source project building a plain-language token risk check for BNB Chain: tw
 
 > **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. Smart contract drafts are unaudited and not deployed. Nothing here is investment, legal, or tax advice. No token sale is open, and none is part of Tavorix's funding request.
 
-Founder: dadangseti
+Founder: dadang setiawan
 
 Demo video: https://www.youtube.com/watch?v=whrqD_Ba2i8
 
