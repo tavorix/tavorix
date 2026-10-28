@@ -6,7 +6,7 @@ Open-source project building a plain-language token risk check for BNB Chain: tw
 
 Founder: dadang setiawan
 
-Demo video: https://www.youtube.com/watch?v=whrqD_Ba2i8
+Demo video: https://www.youtube.com/watch?v=Vl_YmNP8aLM
 
 ## Repository layout
 
