@@ -2,7 +2,7 @@
 
 Open-source project building a plain-language token risk check for BNB Chain: two separate scores (scam risk and centralization risk), each with its reasons shown.
 
-> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. The scanner is not validated: see the initial evaluation sample below. Nothing here is investment, legal, or tax advice. No token has been issued and no token sale is open.
+> **Status: early-stage.** A public demo runs in your browser at [tavorix.xyz/check](https://tavorix.xyz/check). The scanner is not validated: see the initial evaluation sample below. Nothing here is investment, legal, or tax advice. No token has been issued and no token sale is open.
 
 Founder: Dadang Setiawan ([github.com/ddng-dev](https://github.com/ddng-dev))
 
