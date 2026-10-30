@@ -73,7 +73,7 @@ def top_holder(d: TokenData) -> CheckResult:
     if d.top_holder_pct is None:
         return _unknown("top_holder", 15)
     return CheckResult("top_holder", d.top_holder_pct > TOP_HOLDER_PCT, 15,
-                       f"One wallet holds {d.top_holder_pct:.1f}% of supply.")
+                       f"One wallet holds {d.top_holder_pct:.1f}% of supply. It may be a treasury or vesting wallet; check who owns it.")
 
 
 def top10(d: TokenData) -> CheckResult:
@@ -136,7 +136,7 @@ def deployer_history(d: TokenData) -> CheckResult:
     if d.deployer_scam_links is None:
         return _unknown("deployer_history", 30)
     return CheckResult("deployer_history", d.deployer_scam_links >= 1, 30,
-                       f"The deployer is linked to {d.deployer_scam_links} earlier flagged token(s).")
+                       f"The deployer is linked to {d.deployer_scam_links} earlier flagged token(s) in third-party data (GoPlus). Shared deployers can cause false links.")
 
 
 def owner_is_wallet(d: TokenData) -> CheckResult:
