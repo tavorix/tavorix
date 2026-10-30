@@ -2,9 +2,9 @@
 
 Open-source project building a plain-language token risk check for BNB Chain: two separate scores (scam risk and centralization risk), each with its reasons shown.
 
-> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. Smart contract drafts are unaudited and not deployed. Nothing here is investment, legal, or tax advice. No token sale is open, and none is part of Tavorix's funding request.
+> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. The scanner is not validated: see the initial evaluation sample below. Nothing here is investment, legal, or tax advice. No token sale is open, and none is part of Tavorix's funding request.
 
-Founder: dadang setiawan
+Founder: Dadang Setiawan ([github.com/ddng-dev](https://github.com/ddng-dev))
 
 Demo video: https://www.youtube.com/watch?v=Vl_YmNP8aLM
 
@@ -12,9 +12,13 @@ Demo video: https://www.youtube.com/watch?v=Vl_YmNP8aLM
 
 | Path | Purpose |
 |---|---|
-| `contracts/` | Unaudited draft contracts for a token concept. Not deployed, not part of the funding request |
 | `scanner/` | Risk Scanner: rule-based checks (18 checks, two scores, JSON report) with 39 automated tests using BNB Chain RPC, DexScreener and GoPlus data |
+| `scanner/my_dataset.csv` | Initial labeled sample (23 verified tokens), see `scanner/EVALUATION.md` |
 | `docs/` | Architecture notes and dataset methodology |
+
+## Initial evaluation (not an accuracy claim)
+
+A first sample of 23 labeled tokens was scored on 30 October 2026, and the results include every failure, among them all 4 old rugpull examples being missed. Read the limitations before quoting anything: [scanner/EVALUATION.md](scanner/EVALUATION.md).
 
 ## Roadmap (proposed, depends on funding and team capacity)
 
