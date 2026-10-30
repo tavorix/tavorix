@@ -2,7 +2,7 @@
 
 Open-source project building a plain-language token risk check for BNB Chain: two separate scores (scam risk and centralization risk), each with its reasons shown.
 
-> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. The scanner is not validated: see the initial evaluation sample below. Nothing here is investment, legal, or tax advice. No token sale is open, and none is part of Tavorix's funding request.
+> **Status: early-stage.** A working scanner demo runs locally and is not yet publicly hosted. The scanner is not validated: see the initial evaluation sample below. Nothing here is investment, legal, or tax advice. No token has been issued and no token sale is open.
 
 Founder: Dadang Setiawan ([github.com/ddng-dev](https://github.com/ddng-dev))
 
@@ -18,9 +18,9 @@ Demo video: https://www.youtube.com/watch?v=Vl_YmNP8aLM
 
 ## Initial evaluation (not an accuracy claim)
 
-A first sample of 23 labeled tokens was scored on 30 October 2026, and the results include every failure, among them all 4 old rugpull examples being missed. Read the limitations before quoting anything: [scanner/EVALUATION.md](scanner/EVALUATION.md).
+A first sample of 23 labeled tokens was scored on 30 October 2026, and the results include every failure, among them all 4 old rugpull examples being missed. Read the limitations before quoting anything: [`scanner/EVALUATION.md`](scanner/EVALUATION.md).
 
-## Roadmap (proposed, depends on funding and team capacity)
+## Roadmap (proposed, depends on team capacity)
 
 1. **Weeks 1 to 6:** Public hosted demo, documentation, first 50 verified dataset entries.
 2. **Weeks 7 to 12:** about 150 verified entries, richer holder and age data, first public accuracy report including failures.
