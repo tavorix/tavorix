@@ -76,3 +76,30 @@ class DemoTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RateLimitTests(unittest.TestCase):
+    def setUp(self):
+        server._hits.clear(); server._all_hits.clear()
+
+    def test_per_visitor_limit_then_recovers(self):
+        for i in range(server.PER_IP_PER_MIN):
+            self.assertEqual(server.allow_request("1.2.3.4", now=1000 + i), 0)
+        self.assertGreater(server.allow_request("1.2.3.4", now=1010), 0)
+        self.assertEqual(server.allow_request("5.6.7.8", now=1010), 0)  # another visitor is unaffected
+        self.assertEqual(server.allow_request("1.2.3.4", now=1070), 0)  # a minute later it works again
+
+    def test_global_limit(self):
+        for i in range(server.GLOBAL_PER_MIN):
+            self.assertEqual(server.allow_request(f"v{i}", now=2000 + i * 0.1), 0)
+        self.assertGreater(server.allow_request("new", now=2010), 0)
+
+    def test_healthz(self):
+        srv = server.make_server(0)
+        port = srv.server_address[1]
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz", timeout=5) as r:
+                self.assertEqual(r.status, 200)
+        finally:
+            srv.shutdown(); srv.server_close()
