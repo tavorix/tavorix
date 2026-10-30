@@ -22,10 +22,11 @@ A first sample of 23 labeled tokens was scored on 30 October 2026, and the resul
 
 ## Roadmap (proposed, depends on team capacity)
 
-1. **Weeks 1 to 6:** Public hosted demo, documentation, first 50 verified dataset entries.
-2. **Weeks 7 to 12:** about 150 verified entries, richer holder and age data, first public accuracy report including failures.
-3. **Weeks 13 to 20:** simulation-based honeypot detection, an open API, and a pilot with traders.
+## Roadmap (proposed, no fixed dates)
 
+1. **Now:** Public hosted demo (live), documentation, labeled dataset grown from 23 to 35 verified entries.
+2. **Next:** Improve detection of old rugpulls (the initial evaluation missed all 4), then publish a small-sample accuracy report including failures.
+3. **Later (no date):** Simulation-based honeypot detection, an open API, and a pilot with traders.
 Anything beyond this (ML models, other chains, a token) comes only after validation, independent audits and legal review.
 
 ## Contact
