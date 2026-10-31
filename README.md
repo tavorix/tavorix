@@ -12,7 +12,7 @@ Demo video: https://www.youtube.com/watch?v=Vl_YmNP8aLM
 
 | Path | Purpose |
 |---|---|
-| `scanner/` | Risk Scanner: rule-based checks (18 checks, two scores, JSON report) with 39 automated tests using BNB Chain RPC, DexScreener and GoPlus data |
+| `scanner/` | Risk Scanner: rule-based checks (18 checks, two scores, JSON report) with 42 automated tests using BNB Chain RPC, DexScreener and GoPlus data |
 | `scanner/my_dataset.csv` | Initial labeled sample (23 verified tokens), see `scanner/EVALUATION.md` |
 | `docs/` | Architecture notes and dataset methodology |
 
@@ -27,8 +27,8 @@ A first sample of 23 labeled tokens was scored on 30 October 2026, and the resul
 1. **Now:** Public hosted demo (live), documentation, labeled dataset grown from 23 to 35 verified entries.
 2. **Next:** Improve detection of old rugpulls (the initial evaluation missed all 4), then publish a small-sample accuracy report including failures.
 3. **Later (no date):** Simulation-based honeypot detection, an open API, and a pilot with traders.
-Anything beyond this (ML models, other chains, a token) comes only after validation, independent audits and legal review.
 
+Anything beyond this (ML models, other chains, a token) comes only after validation, independent audits and legal review.
 ## Contact
 
 - Partnerships: partnerships@tavorix.xyz
