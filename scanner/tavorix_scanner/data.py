@@ -126,7 +126,8 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
     d.has_blacklist = scan_selectors(code, config.SELECTORS["blacklist"])
     d.has_pause = scan_selectors(code, config.SELECTORS["pause"])
     slot = rpc.get_storage(address, config.EIP1967_IMPL_SLOT)
-    d.is_proxy = (int(slot, 16) != 0) or scan_selectors(code, config.SELECTORS["proxy"])
+    slot_is_proxy = int(slot, 16) != 0  # EIP-1967 implementation slot is set: a certain proxy
+    d.is_proxy = slot_is_proxy or scan_selectors(code, config.SELECTORS["proxy"])
     d.owner_renounced, d.owner_is_contract = _owner_info(rpc, address)
     pair, value = _main_pool(rpc, address)
     if pair:
@@ -153,6 +154,8 @@ def fetch_token_data(address: str, rpc: RpcClient, dex_fetch=None, goplus_fetch=
                 trace.append("GoPlus")
             for key, value in goplus_mod.to_features(info).items():
                 setattr(d, key, value)
+            if slot_is_proxy:  # GoPlus must not erase a proxy that was read directly from the chain
+                d.is_proxy = True
             _guard_simulation(d, info)
             if d.impersonates_known_token is None:  # fall back to GoPlus name/symbol if the RPC gave none
                 d.impersonates_known_token, d.impersonated_symbol = find_impersonation(
