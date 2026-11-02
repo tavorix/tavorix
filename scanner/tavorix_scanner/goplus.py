@@ -10,6 +10,7 @@ from typing import Optional
 from . import config
 
 BASE = "https://api.gopluslabs.io/api/v1/token_security/56"
+MAX_PCT = 100.5  # small tolerance for rounding; anything above is treated as inconsistent data
 
 
 def fetch(address: str, timeout: int = 20, retries: int = 3) -> Optional[dict]:
@@ -72,7 +73,9 @@ def to_features(info: dict) -> dict:
     people = [h for h in holders
               if (h.get("address") or "").lower() not in dead and str(h.get("is_contract")) != "1"]
     pcts = sorted([p for p in (_pct(h.get("percent")) for h in people) if p is not None], reverse=True)
-    if pcts:
+    # Sanity check: a holder share above 100%, or top-10 above 100%, is impossible. It means the
+    # third-party supply data is inconsistent, so report holder data as unknown instead of scoring it.
+    if pcts and pcts[0] <= MAX_PCT and sum(pcts[:10]) <= MAX_PCT:
         out["top_holder_pct"] = pcts[0]
         out["top10_pct"] = sum(pcts[:10])
 
